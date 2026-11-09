@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import MovieCard from "./MovieCard";
 import "./App.css";
 
 const App = () => {
@@ -9,7 +8,7 @@ const App = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const API_KEY = "YOUR_API_KEY";
+  const API_KEY = "99eb9fd1";
 
   const fetchMovies = async () => {
     if (!search.trim()) {
@@ -24,7 +23,7 @@ const App = () => {
 
     try {
       const response = await fetch(
-        `https://www.omdbapi.com/?apikey=99eb9fd1&s=${encodeURIComponent(search)}`
+        `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(search)}`
       );
 
       const data = await response.json();
@@ -63,7 +62,7 @@ const App = () => {
         </button>
       </div>
 
-      {loading && <p>Loading movies...</p>}
+      {loading && <p>Loading...</p>}
 
       {error && (
         <p className="error">{error}</p>
@@ -71,10 +70,20 @@ const App = () => {
 
       <div className="movie-list">
         {movies.map((movie) => (
-          <MovieCard
-            key={movie.imdbID}
-            movie={movie}
-          />
+          <div className="movie-card" key={movie.imdbID}>
+            <img
+              src={
+                movie.Poster !== "N/A"
+                  ? movie.Poster
+                  : "https://placehold.co/200x300?text=No+Poster"
+              }
+              alt={movie.Title}
+            />
+
+            <h3>{movie.Title}</h3>
+
+            <p>Release Year: {movie.Year}</p>
+          </div>
         ))}
       </div>
     </div>
