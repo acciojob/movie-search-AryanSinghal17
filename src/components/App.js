@@ -1,58 +1,84 @@
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import MovieCard from "./MovieCard";
+import "./App.css";
 
-function App() {
-  const [name, setName] = useState('');
+const App = () => {
+  const [search, setSearch] = useState("");
   const [movies, setMovies] = useState([]);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function deatApi() {
-    if (!name.trim()) return;
+  const API_KEY = "YOUR_API_KEY";
+
+  const fetchMovies = async () => {
+    if (!search.trim()) {
+      setMovies([]);
+      setError("Please enter a movie name");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setMovies([]);
 
     try {
-      setLoading(true);
+      const response = await fetch(
+        `https://www.omdbapi.com/?apikey=99eb9fd1&s=${encodeURIComponent(search)}`
+      );
 
-      const url = `https://www.omdbapi.com/?apikey=69f788d2&s=${encodeURIComponent(name)}`;
-
-      const res = await fetch(url);
-      const data = await res.json();
+      const data = await response.json();
 
       if (data.Response === "True") {
         setMovies(data.Search);
       } else {
-        setMovies([]);
-        console.log(data.Error);
+        setError(data.Error || "No movies found");
       }
-
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div>
-      <input
-        type="text"
-        value={name}
-        placeholder="Movie name"
-        onChange={(e) => setName(e.target.value)}
-      />
+    <div className="container">
+      <h1>Movie Search App</h1>
 
-      <button onClick={deatApi}>Search</button>
+      <div className="search-box">
+        <input
+          type="text"
+          placeholder="Enter movie name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              fetchMovies();
+            }
+          }}
+        />
 
-      {loading && <p>Loading...</p>}
+        <button onClick={fetchMovies}>
+          Search
+        </button>
+      </div>
 
-      {movies.map((movie) => (
-        <div key={movie.imdbID}>
-          <h3>{movie.Title}</h3>
-          <p>{movie.Year}</p>
-          <img src={movie.Poster} alt={movie.Title} width="100" />
-        </div>
-      ))}
+      {loading && <p>Loading movies...</p>}
+
+      {error && (
+        <p className="error">{error}</p>
+      )}
+
+      <div className="movie-list">
+        {movies.map((movie) => (
+          <MovieCard
+            key={movie.imdbID}
+            movie={movie}
+          />
+        ))}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
